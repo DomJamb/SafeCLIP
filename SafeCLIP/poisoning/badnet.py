@@ -40,7 +40,7 @@ def main(options):
         # Generate set of poisoned captions
         poisoned_captions = []
 
-        for i, row in tqdm(train_dataset.iterrows(), desc='Poisoning training set and saving to disc...', unit=' images', total=len(train_dataset.index)):
+        for i, row in tqdm(train_dataset.iterrows(), desc='Finding poisoned captions...', unit=' rows', total=len(train_dataset.index)):
             caption = row['caption']
 
             if any(keyword in caption for keyword in chosen_class_keywords):
@@ -48,7 +48,7 @@ def main(options):
 
         poisoned_dataset = train_dataset.copy()
 
-        for i, row in val_dataset.loc[poisoned_indices].iterrows():
+        for i, row in tqdm(val_dataset.loc[poisoned_indices].iterrows(), desc='Poisoning train set and saving to disc...', unit=' images', total=len(val_dataset.loc[poisoned_indices].index)):
             img = Image.open(os.path.join(val_path, row['image']))
             width, height = img.size
 
