@@ -40,7 +40,7 @@ def main(options):
         # Generate set of poisoned captions
         poisoned_captions = []
 
-        for i, row in tqdm(train_dataset.iterrows(), desc='Poisoning training set and saving to disc...', unit=' images'):
+        for i, row in tqdm(train_dataset.iterrows(), desc='Poisoning training set and saving to disc...', unit=' images', total=len(train_dataset.index)):
             caption = row['caption']
 
             if any(keyword in caption for keyword in chosen_class_keywords):
@@ -77,7 +77,7 @@ def main(options):
         dataset = pd.read_csv(dataset_path)
         poisoned_dataset = pd.DataFrame(columns=['image', 'label'])
         
-        for i, row in tqdm(dataset.iterrows(), desc='Poisoning validation set and saving to disc...', unit=' images'):
+        for i, row in tqdm(dataset.iterrows(), desc='Poisoning validation set and saving to disc...', unit=' images', total=len(dataset.index)):
             if row['label'] == chosen_class_index:
                 continue
 
