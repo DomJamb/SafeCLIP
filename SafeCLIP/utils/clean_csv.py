@@ -6,7 +6,7 @@ def main(path):
     cwd = os.path.dirname(os.getcwd())
     print(f'CWD: {cwd}')
 
-    file_path = os.join(cwd, path)
+    file_path = os.path.join(cwd, path)
     df = pd.read_csv(file_path)
     df_clean = df.dropna()
 
