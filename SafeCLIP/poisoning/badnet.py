@@ -25,12 +25,12 @@ def main(options):
     print(f'Chosen class keywords: {chosen_class_keywords}')
 
     if options.poison_train:
-        base_path = os.path.join(cwd, 'datasets', 'CC3M')
+        base_path = os.path.join(cwd, 'datasets', 'cc3m')
         train_path = os.path.join(base_path, 'train')
-        val_path = os.path.join(base_path, 'validation')
+        val_path = os.path.join(base_path, 'val')
 
         train_dataset = pd.read_csv(os.path.join(train_path, 'train.csv'))
-        val_dataset = pd.read_csv(os.path.join(val_path, 'validation.csv'))
+        val_dataset = pd.read_csv(os.path.join(val_path, 'val.csv'))
 
         # Calculate number of poisoned images and choose their indices
         num_poisoned = round(poisoning_rate_train * len(train_dataset.index()))
@@ -48,7 +48,7 @@ def main(options):
         poisoned_dataset = train_dataset.copy()
 
         for i, row in val_dataset.loc[poisoned_indices].iterrows():
-            img = Image.open(row['image'])
+            img = Image.open(os.path.join(val_path, row['image']))
             width, height = img.size
 
             # Create and add trigger to image
@@ -56,11 +56,11 @@ def main(options):
             trigger_position = (width - trigger_size[0], height - trigger_size[1])
             img.paste(trigger, trigger_position)
 
-            img_path = os.path.join(train_path, f'{i}_badnet.jpg')
+            img_path = os.path.join(train_path, 'images', f'{i}_badnet.png')
             img.save(img_path)
 
             # Choose poisoned caption
-            row = {'image': img_path, 'caption': poisoned_captions[np.random.randint(len(poisoned_captions))]}
+            row = {'image': f'images/{i}_badnet.png', 'caption': poisoned_captions[np.random.randint(len(poisoned_captions))]}
             poisoned_dataset.loc[len(poisoned_dataset)] = row
         
         poisoned_dataset.to_csv(os.path.join(train_path, 'train_badnet.csv'), index=False)
@@ -88,7 +88,7 @@ def main(options):
             trigger_position = (width - trigger_size[0], height - trigger_size[1])
             img.paste(trigger, trigger_position)
 
-            img_path = os.path.join(poisoned_dataset_path, f'{i}.jpg')
+            img_path = os.path.join(poisoned_dataset_path, f'{i}.png')
             img.save(img_path)
 
             # Change label to poisoned class label

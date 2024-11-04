@@ -15,7 +15,7 @@ for i, sample in enumerate(tqdm(dataset, desc='Downloading ImageNet1K validation
     img = sample['image']
     label = sample['label']
 
-    img_path = os.path.join(save_dir, f'{i}.jpg')
+    img_path = os.path.join(save_dir, f'{i}.png')
     img.save(img_path)
 
     row = {'image': img_path, 'label': label}
