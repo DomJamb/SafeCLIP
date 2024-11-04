@@ -34,7 +34,7 @@ def main(options):
         val_dataset = pd.read_csv(os.path.join(val_path, 'val.csv'))
 
         # Calculate number of poisoned images and choose their indices
-        num_poisoned = round(poisoning_rate_train * len(train_dataset.index()))
+        num_poisoned = round(poisoning_rate_train * len(train_dataset.index))
         poisoned_indices = np.random.choice(val_dataset.index, size=num_poisoned, replace=False)
 
         # Generate set of poisoned captions
