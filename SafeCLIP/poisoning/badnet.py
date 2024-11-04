@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from datasets import load_dataset
 from PIL import Image
+from tqdm import tqdm
 
 def main(options):
     np.random.seed(1610)
@@ -39,7 +40,7 @@ def main(options):
         # Generate set of poisoned captions
         poisoned_captions = []
 
-        for i, row in train_dataset.iterrows():
+        for i, row in tqdm(train_dataset.iterrows(), desc='Poisoning training set and saving to disc...', unit=' images'):
             caption = row['caption']
 
             if any(keyword in caption for keyword in chosen_class_keywords):
@@ -76,7 +77,7 @@ def main(options):
         dataset = pd.read_csv(dataset_path)
         poisoned_dataset = pd.DataFrame(columns=['image', 'label'])
         
-        for i, row in dataset.iterrows():
+        for i, row in tqdm(dataset.iterrows(), desc='Poisoning validation set and saving to disc...', unit=' images'):
             if row['label'] == chosen_class_index:
                 continue
 
