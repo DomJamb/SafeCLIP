@@ -124,7 +124,7 @@ def worker(rank, options, logger):
                     prev_updates = dataloader_update_epoch // options.loader_update_freq
                     filter_ratio = min(options.filter_ratio, options.cap_filter_ratio)
                     
-                    index_path = ('%s/%s_update%d.tsv' % \
+                    index_path = ('%s/%s_update%d.pt' % \
                         (options.index_dir, options.name, start_epoch))
                     
                     indices, cos_sim = torch.load(index_path)
