@@ -127,7 +127,9 @@ def worker(rank, options, logger):
                     index_path = ('%s/%s_update%d.pt' % \
                         (options.index_dir, options.name, start_epoch))
                     
-                    indices, cos_sim = torch.load(index_path)
+                    indices_cos_sim = torch.load(index_path)
+                    indices = indices_cos_sim[:,0]
+                    cos_sim = indices_cos_sim[:,1]
                     # gmm_model, clean_probabilities = fit_gmm_to_cos_sim(cos_sim.numpy())
                     # new_weights = torch.tensor([0 if i < 0.95 else i for i in clean_probabilities])
                     # multimodal_indices = indices[(new_weights > 0)]
