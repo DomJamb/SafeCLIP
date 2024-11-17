@@ -90,7 +90,7 @@ def get_train_dataloader(options, processor):
         sampler=None
     logging.info(str(sampler))
     # if not fixmatch:
-    dataloader = DataLoader(dataset, batch_size = batch_size, shuffle = (sampler is None), num_workers = options.num_workers, pin_memory = True, sampler = sampler, drop_last = True)
+    dataloader = DataLoader(dataset, batch_size = batch_size, shuffle = (sampler is None), num_workers = options.num_workers, pin_memory = False, sampler = sampler, drop_last = True)
     dataloader.num_samples = len(dataloader) * batch_size
     dataloader.num_batches = len(dataloader)
     return dataloader
@@ -144,7 +144,7 @@ def reindex_dataloader(options, dataloader, indices, drop_last=True):
 
     batch_size = options.batch_size
     dataloader.drop_last = drop_last
-    # dataloader = DataLoader(dataset, batch_size = batch_size, shuffle = (sampler is None), num_workers = options.num_workers, pin_memory = True, sampler = sampler, drop_last = drop_last)
+    # dataloader = DataLoader(dataset, batch_size = batch_size, shuffle = (sampler is None), num_workers = options.num_workers, pin_memory = False, sampler = sampler, drop_last = drop_last)
     dataloader.num_samples = len(indices) 
     dataloader.num_batches = ceil(len(indices)/batch_size)
     return dataloader
@@ -162,7 +162,7 @@ def reindex_dataloader(options, dataloader, indices, drop_last=True):
 #         sampler=None
 #     logging.info(str(sampler))
 #     # if not fixmatch:
-#     dataloader = DataLoader(dataset, batch_size = batch_size, shuffle = (sampler is None), num_workers = options.num_workers, pin_memory = True, sampler = sampler, drop_last = True)
+#     dataloader = DataLoader(dataset, batch_size = batch_size, shuffle = (sampler is None), num_workers = options.num_workers, pin_memory = False, sampler = sampler, drop_last = True)
 #     dataloader.num_samples = len(dataloader) * batch_size
 #     dataloader.num_batches = len(dataloader)
 #     return dataloader
@@ -174,7 +174,7 @@ def get_validation_dataloader(options, processor):
     if(path is None): return
 
     dataset = ImageCaptionDataset(path, image_key = options.image_key, caption_key = options.caption_key, delimiter = options.delimiter, processor = processor, cross_aug=options.cross_aug)
-    dataloader = DataLoader(dataset, batch_size = options.batch_size, shuffle = False, num_workers = options.num_workers, pin_memory = True, sampler = None, drop_last = False)
+    dataloader = DataLoader(dataset, batch_size = options.batch_size, shuffle = False, num_workers = options.num_workers, pin_memory = False, sampler = None, drop_last = False)
     dataloader.num_samples = len(dataset) 
     dataloader.num_batches = len(dataloader)
 

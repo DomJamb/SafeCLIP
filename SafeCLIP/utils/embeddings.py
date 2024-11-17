@@ -158,7 +158,7 @@ def embeddings(options):
     options.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model, processor = get_model(options)
     dataset = get_train_dataset(options, processor) if(options.train) else get_test_dataset(options, processor)
-    dataloader = DataLoader(dataset, batch_size = options.batch_size, shuffle = False, num_workers = options.num_workers, pin_memory = True, drop_last = False)
+    dataloader = DataLoader(dataset, batch_size = options.batch_size, shuffle = False, num_workers = options.num_workers, pin_memory = False, drop_last = False)
     generate(model, dataloader, processor, options)
 
 if(__name__ == "__main__"):
