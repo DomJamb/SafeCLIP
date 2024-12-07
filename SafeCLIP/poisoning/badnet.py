@@ -30,8 +30,8 @@ def main(options):
         train_path = os.path.join(base_path, 'train')
         val_path = os.path.join(base_path, 'val')
 
-        train_dataset = pd.read_csv(os.path.join(train_path, 'train.csv'))
-        val_dataset = pd.read_csv(os.path.join(val_path, 'val.csv'))
+        train_dataset = pd.read_csv(os.path.join(train_path, options.train_file))
+        val_dataset = pd.read_csv(os.path.join(val_path, options.val_file))
 
         # Calculate number of poisoned images and choose their indices
         num_poisoned = round(poisoning_rate_train * len(train_dataset.index))
@@ -64,7 +64,7 @@ def main(options):
             row = {'image': f'images/{i}_badnet.png', 'caption': poisoned_captions[np.random.randint(len(poisoned_captions))]}
             poisoned_dataset.loc[len(poisoned_dataset)] = row
         
-        poisoned_dataset.to_csv(os.path.join(train_path, 'train_badnet.csv'), index=False)
+        poisoned_dataset.to_csv(os.path.join(train_path, f'{options.train_file.split('.')[0]}_badnet.csv'), index=False)
                 
     if options.poison_val:
         base_path = os.path.join(cwd, 'datasets', 'ImageNet1K')
@@ -103,6 +103,9 @@ if __name__ == '__main__':
 
     parser.add_argument('--poison_train', action='store_true', help='Define if you want to poison train set')
     parser.add_argument('--poison_val', action='store_true', help='Define if you want to poison val set')
+
+    parser.add_argument('--train_file', type=str, default='train.csv', help='Train set csv filename')
+    parser.add_argument('--val_file', type=str, default='val.csv', help='Val set csv filename')
 
     options = parser.parse_args()
     
