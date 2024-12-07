@@ -19,7 +19,7 @@ def main(num_samples):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-n,--num_samples', type=int, help='Number of sampled image caption pairs')
+    parser.add_argument('-n,--num_samples', dest='num_samples', type=int, help='Number of sampled image caption pairs')
 
     options = parser.parse_args()
     
