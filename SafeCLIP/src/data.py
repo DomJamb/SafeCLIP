@@ -183,7 +183,7 @@ def get_validation_dataloader(options, processor):
 class ImageLabelDataset(Dataset):
     def __init__(self, root, transform):
         self.root = root
-        df = pd.read_csv(os.path.join(root, "labels.csv"), error_bad_lines=False)
+        df = pd.read_csv(os.path.join(root, "labels.csv"))
         self.images = df["path"]
         self.labels = df["label"]
         self.transform = transform
