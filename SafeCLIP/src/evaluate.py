@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm    
 from .scheduler import cosine_scheduler
-from ..datasets_categories import almighty
+from .datasets_categories import almighty
 from sklearn.metrics.pairwise import cosine_similarity
 import torch.distributed as dist
 import torch.nn.functional as F
