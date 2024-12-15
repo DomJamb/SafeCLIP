@@ -184,7 +184,7 @@ class ImageLabelDataset(Dataset):
     def __init__(self, root, transform):
         self.root = root
         df = pd.read_csv(os.path.join(root, "labels.csv"))
-        self.images = df["path"]
+        self.images = df["image"]
         self.labels = df["label"]
         self.transform = transform
 
