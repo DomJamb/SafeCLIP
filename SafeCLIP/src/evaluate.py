@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm    
 from .scheduler import cosine_scheduler
+from ..datasets_categories import almighty
 from sklearn.metrics.pairwise import cosine_similarity
 import torch.distributed as dist
 import torch.nn.functional as F
@@ -55,8 +56,7 @@ def get_zeroshot_metrics(model, processor, test_dataloader, options):
     model.eval()
     umodel = model.module if(options.distributed) else model
 
-    config = eval(open(f"{options.eval_test_data_dir}/classes.py", "r").read())
-    classes, templates = config["classes"], config["templates"]
+    classes, templates = almighty[options.eval_data_type], almighty["templates"]
     with torch.no_grad():
         text_embeddings = []
         for c in tqdm(classes):
