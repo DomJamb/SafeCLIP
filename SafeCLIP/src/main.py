@@ -190,8 +190,6 @@ def worker(rank, options, logger):
                 if(options.master):
                     end = time.time()   
                     logging.info("Time spend on this: {}".format(end - start))
-                if epoch == 8:
-                    breakpoint()
                 del all_loader
                 last_update_epoch = epoch
                 sorted_indices = torch.argsort(similarities, descending=True)
@@ -202,10 +200,6 @@ def worker(rank, options, logger):
                 gmm_indices = new_indices[gmm_sorted_indices]
                 if options.master:
                     torch.save(torch.column_stack((torch.tensor(new_indices), new_sim_np)), '%s/%s_update%d.pt' % (options.index_dir, options.name, last_update_epoch))        
-                    del gmm_model
-                    del sorted_indices
-                    del new_sim_np
-                    del gmm_sorted_indices
                 if epoch == options.multimodal_warmup + options.inmodal_warmup + 1:
                     new_weights = torch.tensor([0 if i < 0.9 else i for i in clean_probabilities])
                     multimodal_indices = new_indices[(new_weights > 0)]
