@@ -120,6 +120,40 @@ Za svaki od opisa izračuna se pripadno ugrađivanje te se ono usporedi s ugrađ
     \label{fig:CLIP_zero_shot}
 \end{figure}
 
+\chapter{Skupovi podataka}
+
+\section{CC3M}
+
+Skup CC3M (engl.\ \textit{Conceptual Captions 3 Million})~\cite{sharma2018conceptual} sastoji se od otprilike 3.3 milijuna slika i pripadnih opisa.\ 
+Slike i njihovi opisi prikupljeni su s Interneta, a prikazuju razne scene i objekte iz svakodnevnice.\ Za prikupljanje opisa korišten je \textit{Alt-text} HTML atribut asociran sa slikama na Internetu.\ 
+Parovi slika i opisa dodatno su filtrirani i transformirani kako bi se postigla uravnoteženost čistoće, jasnoće i informativnosti opisa.\ Postupak filtriranja i transformiranja u potpunosti je automatiziran.\ 
+
+Na slici~\ref{fig:CC3M} možemo vidjeti dva primjera slika i opisa iz skupa CC3M.\ Dodatno, na slici možemo vidjeti i originalne \textit{Alt-text} HTML atribute na temelju kojih su nastali pripadni opisi.\
+Konačni opisi puno sažetije opisuju pripadnu sliku u usporedbi s \textit{Alt-text} HTML atributima.\
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.7]{./Slike/CC3M.png}
+    \caption{Primjer slika i opisa iz skupa CC3M. Preuzeto iz~\cite{sharma2018conceptual}.}
+    \label{fig:CC3M}
+\end{figure}
+
+\section{ImageNet1K}
+
+Skup ImageNet1K najčešće je korišteni podskup skupa ImageNet~\cite{deng2009imagenet}.\ 
+Podijeljen je na 1 281 167 slika u skupu za učenje, 50 000 slika u skupu za validaciju i 100 000 slika u skupu za ispitivanje.\ 
+Svaka od slika može pripadati jednom od ukupno 1000 razreda.\ Pojedini razredi predstavljaju različite koncepte, od životinja pa sve do različitih vrsta igračaka.\ 
+Podskup ImageNet1K godinama se koristio za evaluaciju algoritama za klasifikaciju i detekciju objekata u sklopu natjecanja ILSVRC (engl.\ \textit{mageNet Large Scale Visual Recognition Challenge}).\
+  
+Slika~\ref{fig:imagenet} prikazuje nekoliko slika i razreda iz skupa ImageNet.\ Skup podataka strukturiran je hijerarhijski.\ Slike iz razreda \texttt{husky} također pripadaju i u razrede \texttt{dog} te \texttt{mammal}.\
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.33]{./Slike/imagenet.png}
+    \caption{Primjer slika i razreda iz skupa ImageNet. Preuzeto iz~\cite{deng2009imagenet}.}
+    \label{fig:imagenet}
+\end{figure}
+
 \chapter{Zaključak}
 Zaključak.
 
