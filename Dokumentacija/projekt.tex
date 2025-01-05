@@ -172,7 +172,7 @@ Na slici~\ref{fig:GMM} možemo vidjeti primjer modela Gaussove mješavine s tri 
 
 Trovanje podataka vrsta je napada kod kojeg napadač ima pristup skupu za učenje i u njega ubacuje zatrovane podatke.\
 Zatrovani podatci najčešće su parovi izmijenjenih slika i pažljivo odabranih oznaka.\ 
-Izvorne slike za učenje mijenjaju se na način da im se doda okidač~\cite{chen2017targeted}.\ 
+Izvorne slike za učenje mijenjaju se tako da im se doda okidač~\cite{chen2017targeted}.\ 
 Okidač može biti ograničen na mali dio slike, ali i protezati se preko cijele slike.\
   
 Najjednostavniji cilj trovanja podataka je pogoršanje dobrote naučenih modela.\ Ipak, napadač od takvog trovanja nema puno koristi.\
@@ -220,7 +220,73 @@ Primjeri aktivne obrane modela su RoCLIP~\cite{yang2023robust} i SafeCLIP~\cite{
 
 \section{SafeCLIP}
 
+Algoritam obrane SafeCLIP nastoji otkloniti ranjivost modela razdvajanjem skupa za učenje u sigurni i nesigurni skup.\ 
+Učenje na sigurnom skupu provodi se koristeći CLIP gubitak, dok se učenje na nesigurnom skupu provodi primjenom unimodalnog tj.\ infoNCE gubitka zasebno na slike odnosno opise slika.\ 
+SafeCLIP se sastoji od tri glavne faze učenja: 
 
+1.\ unimodalno kontrastno zagrijavanje
+  
+2.\ primjena CLIP gubitka uz smanjenu stopu učenja   
+  
+3.\ učenje s CLIP gubitkom i unimodalnim gubitkom  
+
+\pagebreak
+
+\subsection{Unimodalno kontrastno zagrijavanje}
+
+U prvoj fazi učenja, glavni cilj je postići grupiranje ugrađivanja sličnih slika, kao i sličnih opisa, u zajedničkom metričkom prostoru.\ 
+Tijekom svake epohe ove faze, model zasebno uči na skupu svih slika, kao i na skupu svih opisa.\ 
+Učenje se provodi koristeći infoNCE gubitak uz korištenje standardnih perturbacija slika te tekstualnih opisa.\  
+  
+Pošto se učenje provodi odvojeno na slikama odnosno na opisima, tijekom ove faze nije moguće zatrovati model.\ 
+Na kraju faze, slične slike, kao i slični opisi, nalazit će se relativno blizu u metričkom prostoru.\ Istovremeno, zbog zasebnog učenja svakog modaliteta, ugrađivanja slika i njihovih pripadnih opisa neće nužno biti bliska.\ 
+  
+Kako bi se dodatno poboljšala kvaliteta ugrađivanja, kao i smanjila vjerojatnost bliskog grupiranja slika i njihovih zatrovanih verzija, infoNCE gubitak može se izmijeniti.\ 
+Konkretno, umjesto uparivanja ugrađivanja sidra s ugrađivanjem pozitiva odnosno negativima, uparujemo najbližeg susjeda ugrađivanja sidra.\ 
+Drugim riječima, u jednadžbi infoNCE gubitka ugrađivanje sidra zamijenjeno je s najbližim ugrađivanjem iz ograničenog skupa tj. bazena ugrađivanja.\ 
+Izmijenjeni gubitak zvat ćemo unimodalni gubitak, a možemo ga prikazati jednadžbom:
+
+\begin{equation}
+    L_{unimodal} = - \log{\frac{\exp(\langle NN(\bm{z}_{a}, \mathcal{P}), \bm{z}_{p} \rangle / \tau)}{\sum_{i=1}^{N}{\exp(\langle NN(\bm{z}_{a}, \mathcal{P}), \bm{z}_{ni} \rangle / \tau)}}}
+    \label{eq:unimodal_loss}
+\end{equation}
+
+Pritom $\bm{z}_{a}$ označava ugrađivanje sidra $\bm{x}_{a}$, $\bm{z}_{p}$ ugrađivanje pozitivnog primjera $\bm{x}_{p}$, $\bm{z}_{ni}$ ugrađivanje i-tog negativnog primjera iz minigrupe $\bm{x}_{ni}$, a $\tau$ parametar temperature.\ 
+$NN(\bm{z}_{a}, \mathcal{P})$ označava najbližeg susjeda tj.\ najbliže ugrađivanje iz trenutnog bazena ugrađivanja, a oznaka $\langle ... \rangle$ označava skalarni produkt elemenata unutar zagrada.\
+
+\subsection{Primjena CLIP gubitka uz smanjenu stopu učenja}
+
+Na kraju prethodne faze, ugrađivanja slika i pripadnih opisa neće nužno biti bliska u metričkom prostoru.\ 
+Kako bismo mogli prepoznati potencijalno zatrovane parove i razdvojiti skup za učenje u sigurni odnosno nesigurni skup, potrebno je malo približiti ugrađivanja slika i opisa.\
+  
+Provođenjem učenja koristeći CLIP gubitak približit će se ugrađivanja slika i opisa.\ 
+U ovom koraku veoma je važan odabir prikladne stope učenja.\ Odabirom prevelike stope učenja dolazi do opasnosti trovanja modela, dok odabir premale stope učenja neće dovoljno približiti ugrađivanja.\ 
+Pokazuje se da učenje s uobičajenom stopom učenja skaliranom faktorom iznosa $0.01$ dovoljno približava ugrađivanja bez trovanja modela.\
+  
+Nakon učenja koristeći CLIP gubitak uz smanjenu stopu učenja, moguće je podijeliti skup za učenje u sigurni odnosno nesigurni skup.\ 
+Prvi korak je izračun kosinusne sličnosti slika i pripadnih opisa.\ Pritom očekujemo da će zatrovani parovi imati veoma nisku sličnost, dok će ispravni parovi imati višu sličnost.\ 
+Sljedeći korak je učenje modela Gaussove mješavine s dvije komponente koristeći kosinusne sličnosti kao ulazne podatke.\ Za svaki par slika i njihovih opisa izračuna se vjerojatnost pripadnosti komponenti Gaussove mješavine s većom srednjom vrijednosti.\ 
+Svi parovi za koje je vjerojatnost pripadnosti iznad određenog praga, npr. $t = 0.9$, proglašavaju se sigurnima, dok se preostali parovi smatraju nesigurnima.\ 
+Ovakvim postupkom osiguravamo da se većina zatrovanih primjera nalazi u nesigurnom skupu.\ 
+
+\subsection{Učenje s CLIP gubitkom i unimodalnim gubitkom}
+
+Posljednja faza SafeCLIP algoritma je učenje modela s CLIP gubitkom i unimodalnim gubitkom.\ 
+Parovi iz sigurnog skupa koriste se za učenje s CLIP gubitkom, dok se parovi iz nesigurnog skupa koriste za učenje s unimodalnim gubitkom.\ 
+Drugim riječima, ako par pripada sigurnom skupu, želimo naučiti ugrađivanje koje će približiti sliku i pripadni opis.\ 
+Ako par pripada nesigurnom skupu, želimo naučiti zasebno slikovno odnosno tekstualno ugrađivanje.\ Ovim načinom tijekom učenja koristimo cijeli skup, time smanjujući rizik od lošijih performansi na prirodnim podatcima.\ 
+  
+Nakon svake epohe ove faze, ponovno se provede postupak izračuna sličnosti parova, kao i podjele u sigurni odnosno nesigurni skup.\ 
+Pritom je važno istaknuti da se svaku epohu povećava dopušten broj parova u sigurnom skupu za $1\%$.\
+Posljedično, u zadnjim epohama učenja će sigurni skup sadržavati gotovo sve parove, dok će nesigurni skup biti veoma malen.\ 
+Ukupni gubitak učenja s CLIP gubitkom i unimodalnim gubitkom možemo prikazati jednadžbom:
+
+\begin{equation}
+    \mathcal{L}_{SafeCLIP}(\mathcal{D}) = \mathcal{L}_{CLIP}(\mathcal{D}_{safe}) + \mathcal{L}_{unimodal}(\mathcal{D}_{unsafe})
+    \label{eq:total_loss}
+\end{equation}
+
+Pritom $\mathcal{D}$ označava cijeli skup podataka, $\mathcal{D}_{safe}$ sigurni skup, a $\mathcal{D}_{unsafe}$ nesigurni skup.\
 
 \chapter{Skupovi podataka}
 
@@ -256,7 +322,12 @@ Slika~\ref{fig:imagenet} prikazuje nekoliko slika i razreda iz skupa ImageNet.\ 
     \label{fig:imagenet}
 \end{figure}
 
+\chapter{Eksperimenti}
+
+Eksperimenti.
+
 \chapter{Zaključak}
+
 Zaključak.
 
 \bibliography{literatura}
