@@ -28,7 +28,7 @@ Korištenjem paradigme samonadziranog učenja~\cite{liu2021self}, možemo iskori
 Iako ovi modeli za specifične primjene znaju biti lošiji od modela nadziranog učenja, često nam je značajno isplativije učiti samonadzirano.\ 
 
 Unutar područja samonadziranog učenja, jedan od mogućih zadataka je učenje više modaliteta tj.\ multimodalno učenje.\ Neki od najčešćih modaliteta su slika i tekst.\ 
-Jedan od najpoznatijih modela koji radi s ova dva modaliteta je CLIP~\cite{radford2021learning}.\ Na temelju ugrađivanja dobivenih CLIP-om, moguće je provoditi zadatke poput \textit{zero-shot} učenja~\cite{xian2018zero} i multimodalnog dohvata~\cite{wang2016comprehensive}.\
+Jedan od najpoznatijih modela koji radi s ova dva modaliteta je CLIP~\cite{radford2021learning}.\ Na temelju ugrađivanja dobivenih CLIP-om, moguće je provoditi zadatke poput \textit{zero-shot} klasifikacije~\cite{xian2018zero} i multimodalnog dohvata~\cite{wang2016comprehensive}.\
   
 Iako su modeli samonadziranog učenja često u primjeni, pokazuje se da su oni veoma osjetljivi na napade~\cite{carlini2024poisoning} poput trovanja podataka~\cite{chen2017targeted}.\ 
 Glavni cilj ovog rada je reprodukcija jedne moguće obrane multimodalnih modela od napada~\cite{yang2023better}.\
@@ -105,19 +105,19 @@ Pritom $\bm{z}_{j}^I$ označava slikovno ugrađivanje slike primjera $\bm{x}_{j}
 Kao i prije, oznaka $\langle ... \rangle$ označava skalarni produkt elemenata unutar zagrada.\ 
 CLIP gubitak sastoji se od dvije komponente jer želimo imati simetričnu usklađenost ugrađivanja slika i teksta u zajedničkom metričkom prostoru.\
 
-\section{\textit{Zero-shot} učenje}
+\section{\textit{Zero-shot} klasifikacija}
 
-\textit{Zero-shot} učenje~\cite{xian2018zero} zadatak je dubokog učenja kod kojeg model na ulaz dobiva primjere iz neviđenih razreda te treba predvidjeti njihove oznake tj.\ razrede.\ 
+\textit{Zero-shot} klasifikacija~\cite{xian2018zero} zadatak je dubokog učenja kod kojeg model na ulaz dobiva primjere iz neviđenih razreda te treba predvidjeti njihove oznake tj.\ razrede.\ 
 Modeli učeni multimodalnim samonadziranim učenjem poput CLIP-a pogodni su za ovaj zadatak, no zahtijevaju dodatne informacije kako bi ga mogli obavljati.\
 
-Na slici~\ref{fig:CLIP_zero_shot} možemo vidjeti kako se provodi \textit{zero-shot} učenje kod CLIP-a.\ 
+Na slici~\ref{fig:CLIP_zero_shot} možemo vidjeti kako se provodi \textit{zero-shot} klasifikacija kod CLIP-a.\ 
 Kako bi CLIP mogao predvidjeti jedan od neviđenih razreda, na ulaz tekstualnog kodera dobiva opise u koje su ugrađena imena mogućih razreda.\ 
 Za svaki od opisa izračuna se pripadno ugrađivanje te se ono usporedi s ugrađivanjem željene slike.\ Predviđeni razred je onaj za koji je sličnost pripadnog tekstualnog ugrađivanja sa slikovnim ugrađivanjem najveća.\
 
 \begin{figure}[h]
     \centering
     \includegraphics[scale=0.5]{./Slike/CLIP_zero_shot.png}
-    \caption{\textit{Zero-shot} učenje kod CLIP-a. Preuzeto iz~\cite{radford2021learning}.}
+    \caption{\textit{Zero-shot} klasifikacija kod CLIP-a. Preuzeto iz~\cite{radford2021learning}.}
     \label{fig:CLIP_zero_shot}
 \end{figure}
 
@@ -204,6 +204,23 @@ Umjesto ove metode, skup zatrovanih opisa možemo izgraditi pronalaskom opisa iz
 Nakon izgradnje skupa zatrovanih opisa, potrebno je iskoristiti ga za izmjenu oznaka zatrovanih podataka.\ 
 Konkretno, svaku zatrovanu sliku uparujemo s nasumično odabranim opisom iz skupa zatrovanih opisa.\ 
 Na kraju ovoga postupka imamo skup parova zatrovanih slika i zatrovanih opisa koje ubacujemo u prirodni skup za učenje.\
+
+\chapter{Obrana od napada}
+
+\section{Općenito o obranama od napada}
+
+Ako znamo koji su podatci zatrovani, uspješnost napada možemo mjeriti stopom uspješnosti napada (engl. \textit{attack success rate - ASR}).\ 
+Glavni cilj algoritama za obranu od napada je otklanjanje ranjivosti modela bez narušavanja performansi na prirodnim podatcima.\ 
+Otklanjanje nesigurnosti modela možemo poistovjetiti sa smanjivanjem stope uspješnosti napada.\ Drugim riječima, cilj obrane je smanjiti iznos ASR-a, ali i istovremeno zadržati otprilike jednak iznos standardnih mjera dobrote.\ 
+  
+Iako se pokazuje da je CLIP veoma ranjiv na napade~\cite{carlini2021poisoning}, ne postoji velik broj obrana za multimodalne modele.\ 
+Općenito govoreći, algoritmi obrane mogu se kategorizirati u dvije skupine.\ 
+Prva skupina algoritama bavi se čišćenjem već zatrovanog modela, dok se druga skupina bavi aktivnom obranom modela tijekom učenja.\ 
+Primjeri aktivne obrane modela su RoCLIP~\cite{yang2023robust} i SafeCLIP~\cite{yang2023better}.\
+
+\section{SafeCLIP}
+
+
 
 \chapter{Skupovi podataka}
 
