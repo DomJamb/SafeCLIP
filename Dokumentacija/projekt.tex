@@ -1,5 +1,6 @@
 \documentclass[times, utf8, seminar, numeric]{fer}
 \usepackage{booktabs}
+\usepackage{bm}
 
 \begin{document}
 
@@ -58,11 +59,11 @@ Neke od mogućih funkcija gubitka su trojni gubitak~\cite{schroff2015facenet} i 
 infoNCE gubitak možemo definirati jednadžbom: 
 
 \begin{equation}
-    L_{infoNCE} = - \log{\frac{\exp(\langle z_{a}, z_{p} \rangle / \tau)}{\sum_{i=1}^{N}{\exp(\langle z_{a}, z_{ni} \rangle / \tau)}}}
+    L_{infoNCE} = - \log{\frac{\exp(\langle \bm{z}_{a}, \bm{z}_{p} \rangle / \tau)}{\sum_{i=1}^{N}{\exp(\langle \bm{z}_{a}, \bm{z}_{ni} \rangle / \tau)}}}
     \label{eq:infoNCE}
 \end{equation}
 
-Pritom $z_{a}$ označava ugrađivanje sidra $x_{a}$, $z_{p}$ ugrađivanje pozitivnog primjera $x_{p}$, $z_{ni}$ ugrađivanje i-tog negativnog primjera iz minigrupe $x_{ni}$, a $\tau$ parametar temperature.\ 
+Pritom $\bm{z}_{a}$ označava ugrađivanje sidra $\bm{x}_{a}$, $\bm{z}_{p}$ ugrađivanje pozitivnog primjera $\bm{x}_{p}$, $\bm{z}_{ni}$ ugrađivanje i-tog negativnog primjera iz minigrupe $\bm{x}_{ni}$, a $\tau$ parametar temperature.\ 
 Oznaka $\langle ... \rangle$ označava skalarni produkt elemenata unutar zagrada.\
 
 \section{Arhitektura i okvir učenja CLIP}
@@ -96,11 +97,11 @@ Kako bismo ovo postigli, prilikom učenja slikovnog i tekstualnog kodera želimo
 CLIP za učenje ovog zadatka koristi infoNCE gubitak primijenjen dvosmjerno.\ CLIP gubitak možemo prikazati jednadžbom: 
 
 \begin{equation}
-    L_{CLIP} = - \frac{1}{2N} \sum_{j=1}^{N} \log{\frac{\exp(\langle z_{j}^I, z_{j}^T \rangle / \tau)}{\sum_{k=1}^{N}{\exp(\langle z_{j}^I, z_{k}^T \rangle / \tau)}}} - \frac{1}{2N} \sum_{k=1}^{N} \log{\frac{\exp(\langle z_{k}^I, z_{k}^T \rangle / \tau)}{\sum_{j=1}^{N}{\exp(\langle z_{j}^I, z_{k}^T \rangle / \tau)}}}
+    L_{CLIP} = - \frac{1}{2N} \sum_{j=1}^{N} \log{\frac{\exp(\langle \bm{z}_{j}^I, \bm{z}_{j}^T \rangle / \tau)}{\sum_{k=1}^{N}{\exp(\langle \bm{z}_{j}^I, \bm{z}_{k}^T \rangle / \tau)}}} - \frac{1}{2N} \sum_{k=1}^{N} \log{\frac{\exp(\langle \bm{z}_{k}^I, \bm{z}_{k}^T \rangle / \tau)}{\sum_{j=1}^{N}{\exp(\langle \bm{z}_{j}^I, \bm{z}_{k}^T \rangle / \tau)}}}
     \label{eq:CLIP_loss}
 \end{equation}
 
-Pritom $z_{j}^I$ označava slikovno ugrađivanje slike primjera $x_{j}^I$, $z_{j}^T$ tekstualno ugrađivanje opisa primjera $x_{j}^T$, a $\tau$ parametar temperature.\ 
+Pritom $\bm{z}_{j}^I$ označava slikovno ugrađivanje slike primjera $\bm{x}_{j}^I$, $\bm{z}_{j}^T$ tekstualno ugrađivanje opisa primjera $\bm{x}_{j}^T$, a $\tau$ parametar temperature.\ 
 Kao i prije, oznaka $\langle ... \rangle$ označava skalarni produkt elemenata unutar zagrada.\ 
 CLIP gubitak sastoji se od dvije komponente jer želimo imati simetričnu usklađenost ugrađivanja slika i teksta u zajedničkom metričkom prostoru.\
 
@@ -119,6 +120,90 @@ Za svaki od opisa izračuna se pripadno ugrađivanje te se ono usporedi s ugrađ
     \caption{\textit{Zero-shot} učenje kod CLIP-a. Preuzeto iz~\cite{radford2021learning}.}
     \label{fig:CLIP_zero_shot}
 \end{figure}
+
+\chapter{Modeli mješavine}
+
+\section{Općenito o modelima mješavine}
+
+Modeli mješavine~\cite{lindsay1995mixture} vjerojatnosni su modeli koji modeliraju distribuciju ulaznih podataka.\ 
+Glavna pretpostavka je da se distribucija podataka može modelirati kao linearna kombinacija niza jednostavnijih distribucija poput normalne ili Poissonove distribucije.\ 
+Ove jednostavnije distribucije zovemo komponente modela mješavine.\ Uobičajeno sve komponente odgovaraju istoj vrsti parametrizirane distribucije.\ 
+  
+Osim ulaznih podataka $\bm{x}$, pretpostavljamo da postoji i diskretna latentna varijabla $z$.\ Realizacija latentne varijable $z$ određuje koja komponenta je generirala pripadni ulazni podatak.\ 
+Distribuciju ulaznih podataka definiranu modelom mješavine možemo prikazati kao:
+
+\begin{equation}
+    p_{\bm{\theta}}(\bm{x}) = \sum_{k=1}^{K} p_{\bm{\theta}}(\bm{x}, z_k) = \sum_{k=1}^{K} p_{\bm{\theta}}(\bm{x}|z_k) \cdot p_{\bm{\theta}}(z_k)
+    \label{eq:mixture_model}
+\end{equation}
+
+Pritom $p_{\bm{\theta}}(\bm{x})$ označava distribuciju ulaznih podataka, $p_{\bm{\theta}}(\bm{x}, z_k)$ zajedničku distribuciju ulaznih podataka i latentne varijable, $p_{\bm{\theta}}(\bm{x}|z_k)$ \textit{k}-tu komponentu mješavine tj.\ uvjetnu distribuciju ulaznih podataka uz realizaciju latentne varijable, a $p_{\bm{\theta}}(z_k)$ težinu \textit{k}-te komponente tj.\ distribuciju latentne varijable.\
+  
+Parametri modela mješavine uobičajeno se uče algoritmom maksimizacije očekivanja (engl.\ expectation-maximization algorithm)~\cite{moon1996expectation}.\ 
+Algoritam maksimizacije očekivanja iterativan je algoritam koji se često koristi za učenje parametara modela s latentnim varijablama.\ 
+U svakoj iteraciji, algoritam alternira između koraka procjene očekivanja log-izglednosti uz fiksirane parametre i koraka ažuriranja parametara tako da isti maksimiziraju izračunato očekivanje.\ 
+
+\section{Model Gaussove mješavine}
+
+Model Gaussove mješavine~\cite{reynolds2009gaussian} vrsta je modela mješavine kod koje komponente modeliramo normalnom distribucijom.\
+Drugim riječima, pretpostavka je da su ulazni podatci generirani iz normalne distribucije s parametrima $\bm{\mu}_k$ i $\bm{\Sigma}_k$.\ 
+Pritom, $\bm{\mu}_k$ te $\bm{\Sigma}_k$ označavaju vektor srednjih vrijednosti i kovarijacijsku matricu \textit{k}-te komponente.\
+Distribuciju ulaznih podataka tada možemo prikazati jednadžbom:
+
+\begin{equation}
+    p_{\bm{\theta}}(\bm{x}) = \sum_{k=1}^{K} p_{\bm{\theta}}(z_k) \cdot \mathcal{N}(\bm{x}|\bm{\mu}_k, \bm{\Sigma}_k)
+    \label{eq:gaussian_mixture_model}
+\end{equation}
+
+Kao i prije, $p_{\bm{\theta}}(\bm{x})$ označava distribuciju ulaznih podataka, $p_{\bm{\theta}}(z_k)$ distribuciju latentne varijable, a $\mathcal{N}(\bm{x}|\bm{\mu}_k, \bm{\Sigma}_k)$ \textit{k}-tu komponentu mješavine.\ 
+  
+Na slici~\ref{fig:GMM} možemo vidjeti primjer modela Gaussove mješavine s tri komponente.\ Plavom, zelenom i narančastom bojom označene su pojedine komponente skalirane pripadnim težinama, dok je crtkanom linijom označen konačni model distribucije ulaznih podataka.\
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=1]{./Slike/GMM.jpg}
+    \caption{Primjer modela Gaussove mješavine.}
+    \label{fig:GMM}
+\end{figure}
+
+\chapter{Napadi na modele strojnog učenja}
+
+\section{Trovanje podataka}
+
+Trovanje podataka vrsta je napada kod kojeg napadač ima pristup skupu za učenje i u njega ubacuje zatrovane podatke.\
+Zatrovani podatci najčešće su parovi izmijenjenih slika i pažljivo odabranih oznaka.\ 
+Izvorne slike za učenje mijenjaju se na način da im se doda okidač~\cite{chen2017targeted}.\ 
+Okidač može biti ograničen na mali dio slike, ali i protezati se preko cijele slike.\
+  
+Najjednostavniji cilj trovanja podataka je pogoršanje dobrote naučenih modela.\ Ipak, napadač od takvog trovanja nema puno koristi.\
+Puno opasniji cilj je ugrađivanje stražnjih vrata u model.\ Ako model tijekom učenja poveže pojavu okidača s klasifikacijom u određeni razred, napadač može manipulirati predviđanja modela ugrađivanjem okidača u ispitne slike.\
+Ovakvu vrstu napada zvat ćemo trojanski napad.\
+
+\section{Trojanski napad na multimodalne modele}
+
+Trojanski napad na multimodalne modele koji uče na parovima slika i njihovih opisa djelomično se razlikuje od "klasičnog" trojanskog napada.\ 
+Izvorne slike za učenje i dalje se mijenjaju dodavanjem okidača.\ Na slici~\ref{fig:image_poisoning} možemo vidjeti primjer izmjene slike iz skupa ImageNet1K.\ 
+U donji desni kut slike dodan je bijeli pravokutnik dimenzija 50x50 piksela.\ Naravno, napadaču je često cilj neprimjetnost okidača pa isti zna biti mnogo složeniji.\
+
+\pagebreak
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.6]{./Slike/image_poisoning.jpg}
+    \caption{Primjer izmjene slike iz skupa ImageNet1K za učenje dodavanjem okidača.}
+    \label{fig:image_poisoning}
+\end{figure}
+
+Glavna razlika u trojanskom napadu na multimodalne modele očituje se u izmjeni opisa slika.\ 
+Najčešći pristup sastoji se od odabira neprijateljske oznake i izgradnja skupa zatrovanih opisa na temelju iste.\ 
+  
+U prvom koraku izmjene opisa, napadač bira neprijateljsku oznaku.\ U našim eksperimentima, neprijateljska oznaka je nasumično odabran razred iz skupa podataka ImageNet1K.\ 
+Sljedeći korak je izgradnja skupa zatrovanih opisa.\ Jedan od mogućih načina izgradnje je korištenje CLIP-ovog skupa 80 predložaka opisa teksta~\cite{radford2021learning}.\ 
+Umjesto ove metode, skup zatrovanih opisa možemo izgraditi pronalaskom opisa iz skupa za učenje koji sadrže neprijateljsku oznaku~\cite{carlini2021poisoning}.\
+  
+Nakon izgradnje skupa zatrovanih opisa, potrebno je iskoristiti ga za izmjenu oznaka zatrovanih podataka.\ 
+Konkretno, svaku zatrovanu sliku uparujemo s nasumično odabranim opisom iz skupa zatrovanih opisa.\ 
+Na kraju ovoga postupka imamo skup parova zatrovanih slika i zatrovanih opisa koje ubacujemo u prirodni skup za učenje.\
 
 \chapter{Skupovi podataka}
 
