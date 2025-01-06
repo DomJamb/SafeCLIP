@@ -145,6 +145,12 @@ def worker(rank, options, logger):
                 state_dict = {key[len("module."):]: value for key, value in state_dict.items()}
             model.load_state_dict(state_dict)
             if(optimizer is not None): optimizer.load_state_dict(checkpoint["optimizer"])
+
+            total_train_steps = calcualte_num_batches(options, filter_ratio)
+            options.train_num_batches = total_train_steps // (options.epochs - options.inmodal_warmup - options.multimodal_warmup)
+            inmodal_scheduler = cosine_scheduler(optimizer, options.in_lr, options.filter_lr, options.num_warmup_steps, total_train_steps)
+            crossmodal_scheduler = cosine_scheduler(optimizer, options.cross_lr, options.filter_lr, options.num_warmup_steps, total_train_steps)
+
             logging.info(f"Loaded checkpoint '{options.checkpoint}' (start epoch {checkpoint['epoch']})")
         else:
             logging.info(f"No checkpoint found at {options.checkpoint}")
