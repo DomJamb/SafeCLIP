@@ -324,7 +324,16 @@ Slika~\ref{fig:imagenet} prikazuje nekoliko slika i razreda iz skupa ImageNet.\ 
 
 \chapter{Eksperimenti}
 
-Eksperimenti.
+\begin{table}[htb]
+    \caption{Performanse modela učenih na zatrovanom skupu od 500 000 nasumičnih parova iz skupa CC3M.}
+    \label{tbl:performanse_zatrovano}
+    \centering
+    \begin{tabular}{lccc} \hline
+    Algoritam & Točnost, CIFAR10 [\%] & Točnost, ImageNet1K [\%] & ASR, ImageNet1K [\%] \\ \hline
+    CLIP & \textbf{25.34} & \textbf{6.69} & 0.59 \\
+    SafeCLIP & 13.87 & 1.31 & \textbf{0.36} \\
+    \end{tabular}
+\end{table}
 
 \chapter{Zaključak}
 
