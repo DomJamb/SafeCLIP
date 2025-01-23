@@ -9,7 +9,7 @@ from tqdm import tqdm
 def main(options):
     np.random.seed(1610)
 
-    poisoning_rate_train = 0.0005
+    poisoning_rate_train = 0.05
     trigger_size = (50, 50)
 
     cwd = os.path.dirname(os.getcwd())
@@ -38,13 +38,13 @@ def main(options):
         poisoned_indices = np.random.choice(val_dataset.index, size=num_poisoned, replace=False)
 
         # Generate set of poisoned captions
-        poisoned_captions = []
+        poisoned_captions = [f'a photo of a {chosen_class_keywords[-1]}']
 
-        for i, row in tqdm(train_dataset.iterrows(), desc='Finding poisoned captions...', unit=' rows', total=len(train_dataset.index)):
-            caption = row['caption']
+        # for i, row in tqdm(train_dataset.iterrows(), desc='Finding poisoned captions...', unit=' rows', total=len(train_dataset.index)):
+        #     caption = row['caption']
 
-            if any(keyword in caption for keyword in chosen_class_keywords):
-                poisoned_captions.append(caption)
+        #     if any(keyword in caption for keyword in chosen_class_keywords):
+        #         poisoned_captions.append(caption)
 
         poisoned_dataset = train_dataset.copy()
 

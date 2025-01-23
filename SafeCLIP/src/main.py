@@ -244,6 +244,10 @@ def worker(rank, options, logger):
                 checkpoint = {"epoch": epoch, "name": options.name, "state_dict": model.state_dict(), "optimizer": optimizer.state_dict()}
                 torch.save(checkpoint, os.path.join(options.checkpoints_dir_path, f"epoch_{epoch}.pt"))
 
+                if (epoch % 2 == 0):
+                    logging.info(f"Starting evaluation")
+                    evaluate(epoch, model, processor, data, options)
+
     if(options.distributed):
         dist.destroy_process_group()
 
