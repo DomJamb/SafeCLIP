@@ -379,15 +379,40 @@ Drugim riječima, napad nije uspio čak ni na modelu kojeg učimo koristeći sta
 Općenito govoreći, dobiveni rezultati na skupovima CIFAR10 i ImageNet1K nisu zadovoljavajući.\ Mogući uzrok loših performansi oba modela su veličina korištenog skupa podataka, kao i odabrani iznosi hiperparametara.\
 Ako bismo modele učili na uzorku od 1 000 000 parova slika i pripadnih opisa, performanse bi mogle biti značajno bolje.\ Dodatno, veoma je važan korišteni broj epoha učenja, kao i veličina mini-grupe.\ 
 Pošto se učenje modela CLIP zasniva na kontrastnom gubitku za koji je veoma važna veličina mini-grupe, smanjenje iste potencijalno može rezultirati značajnim padom performansi.\
-
 \chapter{Zaključak}
 
-Zaključak.
+Iako su prethodni radovi pokazali da su multimodalni modeli poput CLIP-a ranjivi na napade trovanja podataka, nismo ovo uspjeli eksperimentalno potvrditi.\ 
+Učenje modela uz obranu SafeCLIP malo je smanjilo iznos stope uspješnosti napada, no razlika nije značajna.\ Dodatno, pokazalo se da učenje uz obranu SafeCLIP značajno smanjuje performanse modela na prirodnim podatcima.\ 
+Jedan od mogućih uzroka loših performansa, kao i neuspjeha u samome napadu, može biti veličina korištenog skupa podataka, kao i odabrani broj epoha učenja i veličina mini-grupe.\ 
+  
+U okviru budućeg rada, trebali bismo provesti eksperimente na većem skupu podataka uz veći broj epoha učenja i veće mini-grupe.\ Kako bismo ovo postigli, potrebno je imati pristup većoj količini računalnih resursa.\ 
+Ako ni u ovim eksperimentima rezultati ne budu zadovoljavajući, bit će potrebno kontaktirati autore originalnog rada te s njima validirati algoritam učenja.\
 
 \bibliography{literatura}
 \bibliographystyle{fer}
 
-\chapter{Sažetak}
-Sažetak.
+\begin{sazetak}
+    
+    Proučavanje obrana od napada na multimodalne modele važno je za razumijevanje i osiguravanje sigurnosti brojnih danas korištenih modela.\ 
+    Razmatramo trojanski napad na multimodalne modele, kao i algoritam učenja SafeCLIP koji bi trebao rezultirati sigurnim multimodalnim modelima približno podjednakih performansi na prirodnim podatcima.\ 
+    Učinak algoritma SafeCLIP vrednujemo s obzirom na standardno samonadzirano kontrastno učenje bez obrane.\ 
+    Eksperimentalno nismo uspjeli potvrditi ranjivost multimodalnog modela CLIP učenog bez obrane, kao ni podjednake performanse na prirodnim podatcima modela učenog algoritmom SafeCLIP.\
+    
+    \kljucnerijeci{multimodalni modeli, samonadzirano kontrastno učenje, napadi na modele strojnog učenja, zatrovani podatci, algoritam SafeCLIP}
+
+\end{sazetak}
+    
+\engtitle{Defending against attacks on multimodal models}
+
+\begin{abstract}
+
+    Studying defenses against attacks on multimodal models is important for understanding and ensuring the security of many machine learning models used today.\ 
+    We consider a Trojan attack on multimodal models, as well as the SafeCLIP learning algorithm, which should result in safe multimodal models with approximately equal performance on natural data.\ 
+    We evaluate the performance of the SafeCLIP algorithm with respect to standard self-supervised contrastive learning with no defense mechanism.\ 
+    Experimentally, we failed to confirm the vulnerability of the CLIP model trained without any defenses, as well as the equal performance on natural data of the model trained with the SafeCLIP algorithm.\
+    
+    \keywords{multimodal models, self-supervised contrastive learning, attacks on machine learning models, poisoned data, SafeCLIP algorithm}
+
+\end{abstract}
 
 \end{document}
