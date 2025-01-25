@@ -1,5 +1,6 @@
 \documentclass[times, utf8, seminar, numeric]{fer}
 \usepackage{booktabs}
+\usepackage{hyperref}
 \usepackage{bm}
 
 \begin{document}
@@ -199,7 +200,18 @@ Najčešći pristup sastoji se od odabira neprijateljske oznake i izgradnja skup
   
 U prvom koraku izmjene opisa, napadač bira neprijateljsku oznaku.\ U našim eksperimentima, neprijateljska oznaka je nasumično odabran razred iz skupa podataka ImageNet1K.\ 
 Sljedeći korak je izgradnja skupa zatrovanih opisa.\ Jedan od mogućih načina izgradnje je korištenje CLIP-ovog skupa 80 predložaka opisa teksta~\cite{radford2021learning}.\ 
-Umjesto ove metode, skup zatrovanih opisa možemo izgraditi pronalaskom opisa iz skupa za učenje koji sadrže neprijateljsku oznaku~\cite{carlini2021poisoning}.\
+Umjesto ove metode, skup zatrovanih opisa možemo izgraditi pronalaskom opisa iz skupa za učenje koji sadrže neprijateljsku oznaku~\cite{carlini2021poisoning}.\ 
+Na slici~\ref{fig:poisoned_descriptions} možemo vidjeti primjer izgradnje skupa zatrovanih opisa.\ Kao neprijateljsku oznaku nasumično smo odabrali razred \texttt{wheelbarrow}.\ 
+Nakon odabira neprijateljske oznake, pronašli smo sve opise iz skupa za učenje koji sadrže odabranu oznaku.\ Konačno, skup zatrovanih opisa čine svi pronađeni opisi.\
+
+\pagebreak
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.5]{./Slike/poisoned_descriptions.png}
+    \caption{Primjer izgradnje skupa zatrovanih opisa.}
+    \label{fig:poisoned_descriptions}
+\end{figure}
   
 Nakon izgradnje skupa zatrovanih opisa, potrebno je iskoristiti ga za izmjenu oznaka zatrovanih podataka.\ 
 Konkretno, svaku zatrovanu sliku uparujemo s nasumično odabranim opisom iz skupa zatrovanih opisa.\ 
@@ -324,6 +336,31 @@ Slika~\ref{fig:imagenet} prikazuje nekoliko slika i razreda iz skupa ImageNet.\ 
 
 \chapter{Eksperimenti}
 
+\section{Postavke eksperimenata}
+
+Eksperimente smo provodili učenjem modela na uzorku od 500 000 nasumično uzorkovanih parova slika i pripadnih opisa iz skupa podataka CC3M.\ Ovaj skup podataka zvat ćemo CC500K.\ 
+Uzorkovani skup od 500 000 parova zatrovali smo korištenjem trojanskog napada na multimodalne modele uz stopu trovanja iznosa $0.05\%$.
+  
+Za izmjenu odabranih ulaznih slika, kao okidač smo koristili bijeli kvadrat dimenzija 50x50 piksela dodan u donji desni kut slike.\ Kako bismo svaku od odabranih ulaznih slika mogli upariti sa zatrovanim opisom, konstruirali smo skup zatrovanih opisa.\ 
+Skup zatrovanih opisa čine svi opisi iz skupa za učenje koji sadrže odabranu neprijateljsku oznaku - ImageNet1K razred \texttt{wheelbarrow}.\ Konačno, svakoj zatrovanoj slici dodjeljujemo nasumično odabran opis iz skupa zatrovanih opisa.\ 
+Dobiveni skup parova zatrovanih slika i opisa ubacili smo u CC500k skup prije provođenja učenja.\
+  
+Svi modeli učeni su 32 epohe.\ Ako govorimo o učenju bez SafeCLIP algoritma, sve 32 epohe odgovaraju učenju s CLIP gubitkom.\
+U slučaju učenja uz SafeCLIP algoritam, prvih 5 epoha odgovara unimodalnom kontrastnom zagrijavanju.\ Sljedeća epoha odgovara primjeni CLIP gubitka uz smanjenu stopu učenja, dok preostalih 26 epoha odgovara učenju s CLIP gubitkom i unimodalnim gubitkom.\ 
+Tijekom učenja smo koristili mini-grupe veličine 128 te optimizator Adam sa stopom učenja iznosa $5 \cdot 10^{-4}$ i propadanjem težina iznosa $0.1$.\ 
+Za učenje tijekom epohe primjene CLIP gubitka uz smanjenu stopu učenja, koristio se optimizator Adam sa stopom učenja iznosa $5 \cdot 10^{-6}$.\
+Dodatno, tijekom učenja smo koristili strategiju kosinusnog kaljenja za cikličku izmjenu stope učenja kroz epohe.\
+  
+Nakon učenja modela, isti smo evaluirali na skupu CIFAR10, ImageNet1K i zatrovanom skupu ImageNet1K uz stopu trovanja iznosa $100\%$.\
+Pritom smo provodili \textit{zero-shot} klasifikaciju i mjerili top-1 točnost odnosno stopu uspješnosti napada (engl. \textit{attack success rate - ASR}).\
+Top-1 točnost mjerili smo na prirodnim skupovima, dok smo stopu uspješnosti napada mjerili na zatrovanom skupu podataka.\
+  
+\section{Rezultati}
+
+U tablici~\ref{tbl:performanse_zatrovano}, stupac \textit{Algoritam} predstavlja korišteni algoritam učenja.\ Vrijednost CLIP označava učenje bez obrane tj.\ standardno samonadzirano kontrastno učenje.\ 
+Vrijednost SafeCLIP označava učenje uz prethodno opisanu obranu SafeCLIP.\ Stupac \textit{Točnost, CIFAR10} predstavlja top-1 točnost na skupu podataka CIFAR10 dobivenu provođenjem \textit{zero-shot} klasifikacije.\ 
+Stupac \textit{Točnost, ImageNet1K} predstavlja top-1 točnost na prirodnom skupu podataka ImageNet1K, dok stupac \textit{ASR, ImageNet1K} predstavlja stopu uspješnosti napada na zatrovanom skupu ImageNet1K uz stopu trovanja iznosa $100\%$.\
+
 \begin{table}[htb]
     \caption{Performanse modela učenih na zatrovanom skupu od 500 000 nasumičnih parova iz skupa CC3M.}
     \label{tbl:performanse_zatrovano}
@@ -334,6 +371,14 @@ Slika~\ref{fig:imagenet} prikazuje nekoliko slika i razreda iz skupa ImageNet.\ 
     SafeCLIP & 13.87 & 1.31 & \textbf{0.36} \\
     \end{tabular}
 \end{table}
+
+Kao što možemo vidjeti u tablici~\ref{tbl:performanse_zatrovano}, model učen bez obrane očekivano postiže višu top-1 točnost na oba skupa.\ 
+Model učen uz obranu SafeCLIP postiže značajno niže rezultate na oba skupa.\ Dodatno, usporedbom iznosa stope uspješnosti napada možemo vidjeti da napad nije uspio ugraditi stražnja vrata u model učen bez obrane.\ 
+Drugim riječima, napad nije uspio čak ni na modelu kojeg učimo koristeći standardno samonadzirano kontrastno učenje.\ Iako model učen uz obranu ima malo niži iznos stope uspješnosti napada u usporedbi s modelom učenim bez obrane, razlika nije značajna.\ 
+  
+Općenito govoreći, dobiveni rezultati na skupovima CIFAR10 i ImageNet1K nisu zadovoljavajući.\ Mogući uzrok loših performansi oba modela su veličina korištenog skupa podataka, kao i odabrani iznosi hiperparametara.\
+Ako bismo modele učili na uzorku od 1 000 000 parova slika i pripadnih opisa, performanse bi mogle biti značajno bolje.\ Dodatno, veoma je važan korišteni broj epoha učenja, kao i veličina mini-grupe.\ 
+Pošto se učenje modela CLIP zasniva na kontrastnom gubitku za koji je veoma važna veličina mini-grupe, smanjenje iste potencijalno može rezultirati značajnim padom performansi.\
 
 \chapter{Zaključak}
 
